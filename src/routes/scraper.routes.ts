@@ -82,6 +82,7 @@ app.openapi(screenshotRoute, async (c) => {
         "Content-Type": "image/png",
         "Content-Disposition": 'attachment; filename="screenshot.png"',
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any
   } catch (error) {
     const errorMessage =
@@ -89,6 +90,7 @@ app.openapi(screenshotRoute, async (c) => {
     return c.json(
       { error: `Failed to take screenshot: ${errorMessage}` },
       500
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
   }
 })
@@ -154,6 +156,7 @@ app.openapi(contentRoute, async (c) => {
       content,
       format: body.format ?? "html",
       url: body.url,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any
   } catch (error) {
     const errorMessage =
@@ -161,6 +164,7 @@ app.openapi(contentRoute, async (c) => {
     return c.json(
       { error: `Failed to extract content: ${errorMessage}` },
       500
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
   }
 })

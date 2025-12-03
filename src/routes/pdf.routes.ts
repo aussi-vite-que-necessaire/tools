@@ -84,11 +84,12 @@ app.openapi(splitRoute, async (c) => {
         "Content-Type": "application/zip",
         "Content-Disposition": 'attachment; filename="pages.zip"',
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error"
-    return c.json({ error: `Failed to split PDF: ${errorMessage}` }, 500) as any
+    return c.json({ error: `Failed to split PDF: ${errorMessage}` }, 500) as any // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 })
 
@@ -197,6 +198,7 @@ app.openapi(mergeRoute, async (c) => {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'attachment; filename="merged.pdf"',
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any
   } catch (error) {
     const errorMessage =
@@ -204,6 +206,7 @@ app.openapi(mergeRoute, async (c) => {
     return c.json(
       { error: `Failed to merge PDFs: ${errorMessage}` },
       500
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
   }
 })
