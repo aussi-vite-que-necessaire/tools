@@ -49,14 +49,17 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install Node.js dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including dev) for building TypeScript
+RUN npm ci
 
 # Copy source code
 COPY . .
 
 # Build TypeScript
 RUN npm run build
+
+# Remove dev dependencies to reduce image size
+RUN npm prune --omit=dev
 
 # Expose port
 EXPOSE 3000
