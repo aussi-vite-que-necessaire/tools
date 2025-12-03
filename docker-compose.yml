@@ -1,31 +1,44 @@
-version: '3.8'
+version: "3.8"
 
 services:
   tools-api:
+    # Use image from GHCR in production, build locally in development
+    image: ${IMAGE_NAME:-ghcr.io/avqn/tools/tools-api:latest}
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: tools-api
+    container_name: ${PROJECT_NAME:-tools-api}_tools-api
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
-      - NODE_ENV=production
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      - API_URL=http://localhost:3000
+      - PORT=${PORT:-3000}
+      - NODE_ENV=${NODE_ENV:-production}
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=${PUPPETEER_SKIP_CHROMIUM_DOWNLOAD:-true}
+      - PUPPETEER_EXECUTABLE_PATH=${PUPPETEER_EXECUTABLE_PATH:-/usr/bin/chromium}
+      - API_URL=${API_URL:-http://localhost:3000}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
-    # Uncomment if using Traefik labels
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.tools-api.rule=Host(`tools-api.yourdomain.com`)"
-    #   - "traefik.http.routers.tools-api.entrypoints=websecure"
-    #   - "traefik.http.routers.tools-api.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.tools-api.loadbalancer.server.port=3000"
+    # Traefik labels (configured dynamically during deployment via .env)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${PROJECT_NAME}-tools-api.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-tools-api.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}-tools-api.tls.certresolver=myresolver"
+      - "traefik.http.services.${PROJECT_NAME}-tools-api.loadbalancer.server.port=3000"
+    networks:
+      - web_network
 
+networks:
+  web_network:
+    external: true
