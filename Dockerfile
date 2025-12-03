@@ -6,12 +6,14 @@ WORKDIR /app
 
 # Install system dependencies required for Puppeteer/Chromium
 # These are essential for running Chromium in a headless environment
+# Note: chromium-sandbox is included in chromium package, libasound2 may need libasound2t64 on newer Debian/Ubuntu
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-sandbox \
+    chromium-browser \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
+    libasound2t64 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libcups2 \
@@ -42,6 +44,7 @@ RUN apt-get update && apt-get install -y \
 # Set environment variables for Puppeteer
 # Skip downloading Chromium (we use system Chromium)
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Try to find chromium executable (chromium or chromium-browser)
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy package files

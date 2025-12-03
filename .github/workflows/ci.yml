@@ -27,42 +27,28 @@ jobs:
       - name: Install system dependencies for Puppeteer
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            chromium \
-            chromium-sandbox \
-            fonts-liberation \
-            libappindicator3-1 \
-            libasound2 \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libcups2 \
-            libdbus-1-3 \
-            libdrm2 \
-            libgbm1 \
-            libgdk-pixbuf2.0-0 \
-            libglib2.0-0 \
-            libgtk-3-0 \
-            libnspr4 \
-            libnss3 \
-            libx11-6 \
-            libx11-xcb1 \
-            libxcb1 \
-            libxcomposite1 \
-            libxcursor1 \
-            libxdamage1 \
-            libxext6 \
-            libxfixes3 \
-            libxi6 \
-            libxrandr2 \
-            libxrender1 \
-            libxss1 \
-            libxtst6 \
-            xdg-utils
+          # Install chromium and dependencies
+          # Note: chromium-sandbox is included in chromium package on Ubuntu 24.04+
+          # Try libasound2t64 first (Ubuntu 24.04+), fallback to libasound2 (older versions)
+          PACKAGES="chromium chromium-browser fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libdrm2 libgbm1 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 xdg-utils"
+          # Try to install libasound2t64 (Ubuntu 24.04+), if it fails try libasound2
+          if sudo apt-get install -y libasound2t64 2>/dev/null; then
+            sudo apt-get install -y $PACKAGES libasound2t64
+          else
+            sudo apt-get install -y $PACKAGES libasound2
+          fi
 
       - name: Set Puppeteer environment variables
         run: |
           echo "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true" >> $GITHUB_ENV
-          echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> $GITHUB_ENV
+          # Try chromium first, fallback to chromium-browser
+          if [ -f /usr/bin/chromium ]; then
+            echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> $GITHUB_ENV
+          elif [ -f /usr/bin/chromium-browser ]; then
+            echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser" >> $GITHUB_ENV
+          else
+            echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable" >> $GITHUB_ENV
+          fi
 
       - name: Install dependencies
         run: npm ci
