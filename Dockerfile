@@ -65,8 +65,14 @@ RUN npm prune --omit=dev
 EXPOSE 3000
 
 # Set non-root user for security (optional but recommended)
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
+# Use existing user with UID 1000 or create one if it doesn't exist
+RUN if id -u 1000 > /dev/null 2>&1; then \
+      EXISTING_USER=$(getent passwd 1000 | cut -d: -f1); \
+      chown -R $EXISTING_USER:$EXISTING_USER /app; \
+    else \
+      useradd -m -u 1000 appuser && chown -R appuser:appuser /app; \
+    fi
+USER 1000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
