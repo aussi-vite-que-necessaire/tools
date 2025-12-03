@@ -202,7 +202,8 @@ jobs:
             # --- B. PULL & START ---
             echo "📥 Pull & Start..."
             docker compose pull
-            docker compose up -d --remove-orphans
+            # Force recreation to apply new Traefik labels
+            docker compose up -d --force-recreate --remove-orphans
 
             # --- C. HEALTH CHECK ---
             echo "🏥 Vérification de la santé du service..."
