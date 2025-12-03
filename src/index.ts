@@ -97,9 +97,13 @@ if (isMainModule) {
     // Close server if it exists
     if (server) {
       try {
-        // @ts-expect-error - server has a close method but types may not expose it
-        if (typeof server.close === "function") {
-          server.close(() => {
+        // Check if server has a close method (may not be in types)
+        if (
+          server &&
+          typeof (server as { close?: (callback?: () => void) => void })
+            .close === "function"
+        ) {
+          ;(server as { close: (callback?: () => void) => void }).close(() => {
             console.log("Server closed")
             process.exit(0)
           })
