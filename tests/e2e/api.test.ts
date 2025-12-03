@@ -163,6 +163,129 @@ describe("E2E API Tests", () => {
         expect(data).toHaveProperty("error")
       })
     })
+
+    describe("POST /api/pdf/extract", () => {
+      it("should return 400 when no file is provided", async () => {
+        const formData = new FormData()
+        formData.append("pageGroups", JSON.stringify([[0, 1]]))
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(400)
+        const data = await res.json()
+        expect(data).toHaveProperty("error")
+      })
+
+      it("should return 400 when pageGroups is missing", async () => {
+        const formData = new FormData()
+        // Create a minimal PDF
+        const { PDFDocument } = await import("pdf-lib")
+        const pdf = await PDFDocument.create()
+        pdf.addPage()
+        const pdfBytes = await pdf.save()
+        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        formData.append("file", blob, "test.pdf")
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(400)
+        const data = await res.json()
+        expect(data).toHaveProperty("error")
+        expect(data.error).toContain("pageGroups")
+      })
+
+      it("should return 400 for invalid JSON in pageGroups", async () => {
+        const formData = new FormData()
+        const { PDFDocument } = await import("pdf-lib")
+        const pdf = await PDFDocument.create()
+        pdf.addPage()
+        const pdfBytes = await pdf.save()
+        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        formData.append("file", blob, "test.pdf")
+        formData.append("pageGroups", "invalid json")
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(400)
+        const data = await res.json()
+        expect(data).toHaveProperty("error")
+        expect(data.error).toContain("JSON")
+      })
+
+      it("should return 400 for invalid pageGroups structure", async () => {
+        const formData = new FormData()
+        const { PDFDocument } = await import("pdf-lib")
+        const pdf = await PDFDocument.create()
+        pdf.addPage()
+        const pdfBytes = await pdf.save()
+        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        formData.append("file", blob, "test.pdf")
+        formData.append("pageGroups", JSON.stringify("not an array"))
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(400)
+        const data = await res.json()
+        expect(data).toHaveProperty("error")
+      })
+
+      it("should return 400 for out of range page index", async () => {
+        const formData = new FormData()
+        const { PDFDocument } = await import("pdf-lib")
+        const pdf = await PDFDocument.create()
+        pdf.addPage()
+        const pdfBytes = await pdf.save()
+        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        formData.append("file", blob, "test.pdf")
+        formData.append("pageGroups", JSON.stringify([[0, 10]]))
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(400)
+        const data = await res.json()
+        expect(data).toHaveProperty("error")
+      })
+
+      it("should extract page groups successfully", async () => {
+        const formData = new FormData()
+        const { PDFDocument } = await import("pdf-lib")
+        // Create a PDF with 5 pages
+        const pdf = await PDFDocument.create()
+        for (let i = 0; i < 5; i++) {
+          pdf.addPage()
+        }
+        const pdfBytes = await pdf.save()
+        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        formData.append("file", blob, "test.pdf")
+        // Extract groups: [0,1], [3,4]
+        formData.append("pageGroups", JSON.stringify([[0, 1], [3, 4]]))
+
+        const res = await app.request("/api/pdf/extract", {
+          method: "POST",
+          body: formData,
+        })
+
+        expect(res.status).toBe(200)
+        expect(res.headers.get("content-type")).toContain("application/zip")
+        const zipBuffer = Buffer.from(await res.arrayBuffer())
+        expect(zipBuffer.length).toBeGreaterThan(0)
+      })
+    })
   })
 
   describe("Swagger Documentation", () => {
