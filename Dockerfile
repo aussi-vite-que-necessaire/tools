@@ -6,14 +6,13 @@ WORKDIR /app
 
 # Install system dependencies required for Puppeteer/Chromium
 # These are essential for running Chromium in a headless environment
-# Note: chromium-sandbox is included in chromium package, libasound2 may need libasound2t64 on newer Debian/Ubuntu
+# Note: chromium-sandbox is included in chromium package on Debian
+# libasound2t64 is Ubuntu-specific, on Debian we use libasound2
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-browser \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
-    libasound2t64 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libcups2 \
