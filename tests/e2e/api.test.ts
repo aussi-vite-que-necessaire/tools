@@ -186,7 +186,9 @@ describe("E2E API Tests", () => {
         const pdf = await PDFDocument.create()
         pdf.addPage()
         const pdfBytes = await pdf.save()
-        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes as unknown as BlobPart], {
+          type: "application/pdf",
+        })
         formData.append("file", blob, "test.pdf")
 
         const res = await app.request("/api/pdf/extract", {
@@ -206,7 +208,9 @@ describe("E2E API Tests", () => {
         const pdf = await PDFDocument.create()
         pdf.addPage()
         const pdfBytes = await pdf.save()
-        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes as unknown as BlobPart], {
+          type: "application/pdf",
+        })
         formData.append("file", blob, "test.pdf")
         formData.append("pageGroups", "invalid json")
 
@@ -227,7 +231,9 @@ describe("E2E API Tests", () => {
         const pdf = await PDFDocument.create()
         pdf.addPage()
         const pdfBytes = await pdf.save()
-        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes as unknown as BlobPart], {
+          type: "application/pdf",
+        })
         formData.append("file", blob, "test.pdf")
         formData.append("pageGroups", JSON.stringify("not an array"))
 
@@ -247,7 +253,9 @@ describe("E2E API Tests", () => {
         const pdf = await PDFDocument.create()
         pdf.addPage()
         const pdfBytes = await pdf.save()
-        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes as unknown as BlobPart], {
+          type: "application/pdf",
+        })
         formData.append("file", blob, "test.pdf")
         formData.append("pageGroups", JSON.stringify([[0, 10]]))
 
@@ -270,7 +278,9 @@ describe("E2E API Tests", () => {
           pdf.addPage()
         }
         const pdfBytes = await pdf.save()
-        const blob = new Blob([pdfBytes], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes as unknown as BlobPart], {
+          type: "application/pdf",
+        })
         formData.append("file", blob, "test.pdf")
         // Extract groups: [0,1], [3,4]
         formData.append("pageGroups", JSON.stringify([[0, 1], [3, 4]]))
