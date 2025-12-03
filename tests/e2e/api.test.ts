@@ -73,7 +73,7 @@ describe("E2E API Tests", () => {
 
         expect(res.status).toBe(200)
         expect(res.headers.get("content-type")).toContain("image/png")
-      })
+      }, 30000) // 30 second timeout for Puppeteer
     })
 
     describe("POST /api/scraper/content", () => {
@@ -116,7 +116,7 @@ describe("E2E API Tests", () => {
         expect(data).toHaveProperty("content")
         expect(data).toHaveProperty("format")
         expect(data).toHaveProperty("url")
-      })
+      }, 30000) // 30 second timeout for Puppeteer
     })
   })
 

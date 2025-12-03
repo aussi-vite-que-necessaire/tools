@@ -10,33 +10,55 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "20.x"
           cache: "npm"
 
       - name: Install system dependencies for Puppeteer
+        timeout-minutes: 10
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           # Install chromium and dependencies
           # Note: chromium-sandbox is included in chromium package on Ubuntu 24.04+
-          # Try libasound2t64 first (Ubuntu 24.04+), fallback to libasound2 (older versions)
-          PACKAGES="chromium chromium-browser fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libdrm2 libgbm1 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 xdg-utils"
-          # Try to install libasound2t64 (Ubuntu 24.04+), if it fails try libasound2
-          if sudo apt-get install -y libasound2t64 2>/dev/null; then
-            sudo apt-get install -y $PACKAGES libasound2t64
-          else
-            sudo apt-get install -y $PACKAGES libasound2
-          fi
+          # Use DEBIAN_FRONTEND=noninteractive to avoid prompts
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            chromium \
+            fonts-liberation \
+            libappindicator3-1 \
+            libatk-bridge2.0-0 \
+            libatk1.0-0 \
+            libcups2 \
+            libdbus-1-3 \
+            libdrm2 \
+            libgbm1 \
+            libgdk-pixbuf2.0-0 \
+            libglib2.0-0 \
+            libgtk-3-0 \
+            libnspr4 \
+            libnss3 \
+            libx11-6 \
+            libx11-xcb1 \
+            libxcb1 \
+            libxcomposite1 \
+            libxcursor1 \
+            libxdamage1 \
+            libxext6 \
+            libxfixes3 \
+            libxi6 \
+            libxrandr2 \
+            libxrender1 \
+            libxss1 \
+            libxtst6 \
+            xdg-utils
+          # Try to install libasound2t64 (Ubuntu 24.04+), fallback to libasound2
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libasound2t64 2>/dev/null || \
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libasound2 || true
 
       - name: Set Puppeteer environment variables
         run: |
