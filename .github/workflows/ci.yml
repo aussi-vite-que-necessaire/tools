@@ -179,11 +179,11 @@ jobs:
             # --- A. GÉNÉRATION DU .ENV ---
             echo "🔧 Génération .env..."
             REPO_LOWER="$REPO_LOWER"
-            # Use API_URL if set, otherwise construct from MAIN_DOMAIN
+            # Use API_URL if set, otherwise use MAIN_DOMAIN directly
             if [ -n "${{ vars.API_URL }}" ]; then
               DOMAIN_NAME="${{ vars.API_URL }}"
             else
-              DOMAIN_NAME="https://api.${{ vars.MAIN_DOMAIN }}"
+              DOMAIN_NAME="https://${{ vars.MAIN_DOMAIN }}"
             fi
             # Remove https:// if present for Traefik Host rule
             DOMAIN_NAME_CLEAN=$(echo "$DOMAIN_NAME" | sed 's|https\?://||')
