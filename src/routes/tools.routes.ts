@@ -14,18 +14,14 @@ const qrCodeRoute = createRoute({
     request: {
         body: {
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: z.object({
                         text: z.string().min(1).describe("Text to encode"),
                         format: z.enum(["png", "svg"]).optional().default("png"),
-                        width: z.number().int().positive().optional().describe("Width of the image"),
-                        margin: z.number().int().min(0).optional().describe("Margin around the QR Code"),
-                        color: z
-                            .object({
-                                dark: z.string().optional().describe("Dark color (hex)"),
-                                light: z.string().optional().describe("Light color (hex)"),
-                            })
-                            .optional(),
+                        width: z.string().optional().describe("Width of the image"),
+                        margin: z.string().optional().describe("Margin around the QR Code"),
+                        color_dark: z.string().optional().describe("Dark color (hex)"),
+                        color_light: z.string().optional().describe("Light color (hex)"),
                     }),
                 },
             },
@@ -68,15 +64,24 @@ const qrCodeRoute = createRoute({
 
 app.openapi(qrCodeRoute, async (c) => {
     try {
-        const body = c.req.valid("json")
-        const { text, format, width, margin, color } = body
+        const body = await c.req.parseBody()
+        const text = body.text as string
+        const format = (body.format as "png" | "svg") || "png"
+        const width = body.width ? parseInt(body.width as string) : undefined
+        const margin = body.margin ? parseInt(body.margin as string) : undefined
+        const colorDark = body.color_dark as string | undefined
+        const colorLight = body.color_light as string | undefined
+
+        if (!text) {
+            return c.json({ error: "Text is required" }, 400)
+        }
 
         const options: QRCode.QRCodeToBufferOptions = {
             width,
             margin,
             color: {
-                dark: color?.dark,
-                light: color?.light,
+                dark: colorDark,
+                light: colorLight,
             },
         }
 

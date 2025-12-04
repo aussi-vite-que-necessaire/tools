@@ -6,6 +6,7 @@ import { serve } from "@hono/node-server"
 import scraperRoutes from "./routes/scraper.routes.js"
 import pdfRoutes from "./routes/pdf.routes.js"
 import toolsRoutes from "./routes/tools.routes.js"
+import imageRoutes from "./routes/image.routes.js"
 import { closeBrowser } from "./lib/browser.js"
 
 const app = new OpenAPIHono()
@@ -25,8 +26,14 @@ if (apiKey) {
 app.route("/", scraperRoutes)
 app.route("/", pdfRoutes)
 app.route("/", toolsRoutes)
+app.route("/", imageRoutes)
 
 // Swagger UI
+app.openAPIRegistry.registerComponent("securitySchemes", "BearerAuth", {
+  type: "http",
+  scheme: "bearer",
+})
+
 app.doc("/doc/json", {
   openapi: "3.0.0",
   info: {
@@ -39,6 +46,11 @@ app.doc("/doc/json", {
     {
       url: process.env.API_URL || "http://localhost:3000",
       description: "API Server",
+    },
+  ],
+  security: [
+    {
+      BearerAuth: [],
     },
   ],
 })

@@ -35,31 +35,27 @@ describe("E2E API Tests", () => {
   describe("Scraper Routes", () => {
     describe("POST /api/scraper/screenshot", () => {
       it("should return 400 for invalid URL", async () => {
+        const formData = new FormData()
+        formData.append("url", "not-a-valid-url")
+
         const res = await app.request("/api/scraper/screenshot", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: "not-a-valid-url",
-          }),
+          body: formData,
         })
 
         expect(res.status).toBe(400)
       })
 
       it("should accept valid screenshot request", async () => {
+        const formData = new FormData()
+        formData.append("url", "https://example.com")
+        formData.append("fullPage", "false")
+        formData.append("width", "1920")
+        formData.append("height", "1080")
+
         const res = await app.request("/api/scraper/screenshot", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: "https://example.com",
-            fullPage: false,
-            width: 1920,
-            height: 1080,
-          }),
+          body: formData,
         })
 
         // Note: This might fail if Puppeteer can't run in test environment
@@ -78,29 +74,25 @@ describe("E2E API Tests", () => {
 
     describe("POST /api/scraper/content", () => {
       it("should return 400 for invalid URL", async () => {
+        const formData = new FormData()
+        formData.append("url", "not-a-valid-url")
+
         const res = await app.request("/api/scraper/content", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: "not-a-valid-url",
-          }),
+          body: formData,
         })
 
         expect(res.status).toBe(400)
       })
 
       it("should accept valid content extraction request", async () => {
+        const formData = new FormData()
+        formData.append("url", "https://example.com")
+        formData.append("format", "html")
+
         const res = await app.request("/api/scraper/content", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: "https://example.com",
-            format: "html",
-          }),
+          body: formData,
         })
 
         // Note: This might fail if Puppeteer can't run in test environment

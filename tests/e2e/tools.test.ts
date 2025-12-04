@@ -4,15 +4,13 @@ import app from "../../src/index"
 describe("Tools API", () => {
     describe("POST /api/tools/qrcode", () => {
         it("should generate a PNG QR code", async () => {
+            const formData = new FormData()
+            formData.append("text", "https://n8n.io")
+            formData.append("format", "png")
+
             const res = await app.request("/api/tools/qrcode", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    text: "https://n8n.io",
-                    format: "png",
-                }),
+                body: formData,
             })
 
             expect(res.status).toBe(200)
@@ -27,16 +25,14 @@ describe("Tools API", () => {
 
         it("should generate a QR code with specific dimensions", async () => {
             const width = 200
+            const formData = new FormData()
+            formData.append("text", "https://n8n.io")
+            formData.append("format", "png")
+            formData.append("width", width.toString())
+
             const res = await app.request("/api/tools/qrcode", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    text: "https://n8n.io",
-                    format: "png",
-                    width,
-                }),
+                body: formData,
             })
 
             expect(res.status).toBe(200)
@@ -49,15 +45,13 @@ describe("Tools API", () => {
         })
 
         it("should generate an SVG QR code", async () => {
+            const formData = new FormData()
+            formData.append("text", "https://n8n.io")
+            formData.append("format", "svg")
+
             const res = await app.request("/api/tools/qrcode", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    text: "https://n8n.io",
-                    format: "svg",
-                }),
+                body: formData,
             })
 
             expect(res.status).toBe(200)
@@ -69,14 +63,12 @@ describe("Tools API", () => {
 
     describe("POST /api/pdf/from-html", () => {
         it("should generate PDF from HTML", async () => {
+            const formData = new FormData()
+            formData.append("html", "<h1>Hello World</h1>")
+
             const res = await app.request("/api/pdf/from-html", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    html: "<h1>Hello World</h1>",
-                }),
+                body: formData,
             })
 
             expect(res.status).toBe(200)

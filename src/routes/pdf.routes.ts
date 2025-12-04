@@ -414,7 +414,7 @@ const fromHtmlRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": {
+        "multipart/form-data": {
           schema: z
             .object({
               html: z.string().optional().describe("HTML content to convert"),
@@ -423,8 +423,8 @@ const fromHtmlRoute = createRoute({
                 .enum(["A4", "Letter", "A3", "A5", "Tabloid", "Legal"])
                 .optional()
                 .default("A4"),
-              landscape: z.boolean().optional().default(false),
-              printBackground: z.boolean().optional().default(true),
+              landscape: z.string().optional().describe("Landscape mode (true/false)"),
+              printBackground: z.string().optional().describe("Print background (true/false)"),
             })
             .refine((data) => data.html || data.url, {
               message: "Either html or url must be provided",
@@ -467,17 +467,26 @@ const fromHtmlRoute = createRoute({
 
 app.openapi(fromHtmlRoute, async (c) => {
   try {
-    const body = c.req.valid("json")
+    const body = await c.req.parseBody()
+    const html = body.html as string | undefined
+    const url = body.url as string | undefined
+    const format = (body.format as any) || "A4"
+    const landscape = body.landscape === "true"
+    const printBackground = body.printBackground !== "false" // Default true
+
+    if (!html && !url) {
+      return c.json({ error: "Either html or url must be provided" }, 400)
+    }
 
     const pdfBuffer = await createPdfFromHtml(
       {
-        html: body.html,
-        url: body.url,
+        html,
+        url,
       },
       {
-        format: body.format,
-        landscape: body.landscape,
-        printBackground: body.printBackground,
+        format,
+        landscape,
+        printBackground,
       }
     )
 

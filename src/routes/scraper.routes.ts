@@ -4,19 +4,7 @@ import { takeScreenshot, extractContent } from "../lib/browser.js"
 
 const app = new OpenAPIHono()
 
-// Schema for screenshot request
-const ScreenshotRequestSchema = z.object({
-  url: z.string().url("Invalid URL format"),
-  fullPage: z.boolean().optional().default(false),
-  width: z.number().int().positive().optional(),
-  height: z.number().int().positive().optional(),
-})
 
-// Schema for content extraction request
-const ContentRequestSchema = z.object({
-  url: z.string().url("Invalid URL format"),
-  format: z.enum(["html", "text"]).optional().default("html"),
-})
 
 // POST /api/scraper/screenshot
 const screenshotRoute = createRoute({
@@ -29,8 +17,13 @@ const screenshotRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": {
-          schema: ScreenshotRequestSchema,
+        "multipart/form-data": {
+          schema: z.object({
+            url: z.string().url("Invalid URL format"),
+            fullPage: z.string().optional().describe("Capture full page (true/false)"),
+            width: z.string().optional().describe("Viewport width"),
+            height: z.string().optional().describe("Viewport height"),
+          }),
         },
       },
     },
@@ -69,11 +62,20 @@ const screenshotRoute = createRoute({
 
 app.openapi(screenshotRoute, async (c) => {
   try {
-    const body = c.req.valid("json")
-    const imageBuffer = await takeScreenshot(body.url, {
-      fullPage: body.fullPage,
-      width: body.width,
-      height: body.height,
+    const body = await c.req.parseBody()
+    const url = body.url as string
+    const fullPage = body.fullPage === "true"
+    const width = body.width ? parseInt(body.width as string) : undefined
+    const height = body.height ? parseInt(body.height as string) : undefined
+
+    if (!url) {
+      return c.json({ error: "URL is required" }, 400)
+    }
+
+    const imageBuffer = await takeScreenshot(url, {
+      fullPage,
+      width,
+      height,
     })
 
     return new Response(new Uint8Array(imageBuffer), {
@@ -105,8 +107,11 @@ const contentRoute = createRoute({
   request: {
     body: {
       content: {
-        "application/json": {
-          schema: ContentRequestSchema,
+        "multipart/form-data": {
+          schema: z.object({
+            url: z.string().url("Invalid URL format"),
+            format: z.enum(["html", "text"]).optional().default("html"),
+          }),
         },
       },
     },
@@ -149,8 +154,15 @@ const contentRoute = createRoute({
 
 app.openapi(contentRoute, async (c) => {
   try {
-    const body = c.req.valid("json")
-    const content = await extractContent(body.url, body.format)
+    const body = await c.req.parseBody()
+    const url = body.url as string
+    const format = (body.format as "html" | "text") || "html"
+
+    if (!url) {
+      return c.json({ error: "URL is required" }, 400)
+    }
+
+    const content = await extractContent(url, format)
 
     return c.json({
       content,
