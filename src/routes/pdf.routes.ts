@@ -6,6 +6,7 @@ import {
   createZipFromPdfs,
   extractPageGroups,
 } from "../lib/pdf.js"
+import { createPdfFromHtml } from "../lib/browser.js"
 
 const app = new OpenAPIHono()
 
@@ -397,6 +398,102 @@ app.openapi(extractRoute, async (c) => {
       error instanceof Error ? error.message : "Unknown error"
     return c.json(
       { error: `Failed to extract pages: ${errorMessage}` },
+      500
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any
+  }
+})
+
+// POST /api/pdf/from-html
+const fromHtmlRoute = createRoute({
+  method: "post",
+  path: "/api/pdf/from-html",
+  tags: ["PDF"],
+  summary: "Create PDF from HTML or URL",
+  description: "Converts HTML content or a webpage URL to a PDF file",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z
+            .object({
+              html: z.string().optional().describe("HTML content to convert"),
+              url: z.string().url().optional().describe("URL to convert"),
+              format: z
+                .enum(["A4", "Letter", "A3", "A5", "Tabloid", "Legal"])
+                .optional()
+                .default("A4"),
+              landscape: z.boolean().optional().default(false),
+              printBackground: z.boolean().optional().default(true),
+            })
+            .refine((data) => data.html || data.url, {
+              message: "Either html or url must be provided",
+            }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Generated PDF file",
+      content: {
+        "application/pdf": {
+          schema: z.instanceof(Buffer),
+        },
+      },
+    },
+    400: {
+      description: "Invalid request",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+    },
+  },
+})
+
+app.openapi(fromHtmlRoute, async (c) => {
+  try {
+    const body = c.req.valid("json")
+
+    const pdfBuffer = await createPdfFromHtml(
+      {
+        html: body.html,
+        url: body.url,
+      },
+      {
+        format: body.format,
+        landscape: body.landscape,
+        printBackground: body.printBackground,
+      }
+    )
+
+    return new Response(new Uint8Array(pdfBuffer), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'attachment; filename="document.pdf"',
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }) as any
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error"
+    return c.json(
+      { error: `Failed to create PDF: ${errorMessage}` },
       500
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any

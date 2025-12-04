@@ -102,6 +102,45 @@ export async function extractContent(
 }
 
 /**
+ * Create a PDF from HTML content or URL
+ */
+export async function createPdfFromHtml(
+  source: { html?: string; url?: string },
+  options: {
+    format?: "A4" | "Letter" | "A3" | "A5" | "Tabloid" | "Legal"
+    landscape?: boolean
+    printBackground?: boolean
+  } = {}
+): Promise<Buffer> {
+  const page = await createPage()
+
+  try {
+    if (source.url) {
+      await page.goto(source.url, {
+        waitUntil: "networkidle2",
+        timeout: 30000,
+      })
+    } else if (source.html) {
+      await page.setContent(source.html, {
+        waitUntil: "networkidle0",
+      })
+    } else {
+      throw new Error("Either html or url must be provided")
+    }
+
+    const pdf = await page.pdf({
+      format: options.format ?? "A4",
+      landscape: options.landscape ?? false,
+      printBackground: options.printBackground ?? true,
+    })
+
+    return Buffer.from(pdf)
+  } finally {
+    await page.close()
+  }
+}
+
+/**
  * Close the browser instance (useful for cleanup)
  */
 export async function closeBrowser(): Promise<void> {

@@ -13,6 +13,13 @@ const app = new OpenAPIHono()
 app.use("*", logger())
 app.use("*", cors())
 
+// Auth Middleware
+import { bearerAuth } from "hono/bearer-auth"
+const apiKey = process.env.API_KEY
+if (apiKey) {
+  app.use("*", bearerAuth({ token: apiKey }))
+}
+
 // Routes
 app.route("/", scraperRoutes)
 app.route("/", pdfRoutes)
@@ -103,7 +110,7 @@ if (isMainModule) {
           typeof (server as { close?: (callback?: () => void) => void })
             .close === "function"
         ) {
-          ;(server as { close: (callback?: () => void) => void }).close(() => {
+          ; (server as { close: (callback?: () => void) => void }).close(() => {
             console.log("Server closed")
             process.exit(0)
           })
