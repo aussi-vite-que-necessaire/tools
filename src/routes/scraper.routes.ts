@@ -19,10 +19,10 @@ const screenshotRoute = createRoute({
       content: {
         "multipart/form-data": {
           schema: z.object({
-            url: z.string().url("Invalid URL format"),
-            fullPage: z.string().optional().describe("Capture full page (true/false)"),
-            width: z.string().optional().describe("Viewport width"),
-            height: z.string().optional().describe("Viewport height"),
+            url: z.string().url("Invalid URL format").openapi({ example: "https://avqn.ch" }),
+            fullPage: z.string().optional().describe("Capture full page (true/false)").openapi({ example: "false" }),
+            width: z.string().optional().describe("Viewport width").openapi({ example: "1920" }),
+            height: z.string().optional().describe("Viewport height").openapi({ example: "1080" }),
           }),
         },
       },
@@ -109,8 +109,8 @@ const contentRoute = createRoute({
       content: {
         "multipart/form-data": {
           schema: z.object({
-            url: z.string().url("Invalid URL format"),
-            format: z.enum(["html", "text"]).optional().default("html"),
+            url: z.string().url("Invalid URL format").openapi({ example: "https://avqn.ch" }),
+            format: z.enum(["html", "text"]).optional().default("html").openapi({ example: "html" }),
           }),
         },
       },

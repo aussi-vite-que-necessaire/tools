@@ -44,24 +44,26 @@ const processRoute = createRoute({
                             type: "string",
                             format: "binary",
                         }),
-                        resize_width: z.string().optional().describe("Resize width"),
-                        resize_height: z.string().optional().describe("Resize height"),
+                        resize_width: z.string().optional().describe("Resize width").openapi({ example: "800" }),
+                        resize_height: z.string().optional().describe("Resize height").openapi({ example: "600" }),
                         resize_fit: z
                             .enum(["cover", "contain", "fill", "inside", "outside"])
                             .optional()
-                            .describe("Resize fit mode"),
-                        resize_background: z.string().optional().describe("Resize background color"),
-                        crop_left: z.string().optional().describe("Crop left (x)"),
-                        crop_top: z.string().optional().describe("Crop top (y)"),
-                        crop_width: z.string().optional().describe("Crop width"),
-                        crop_height: z.string().optional().describe("Crop height"),
+                            .describe("Resize fit mode")
+                            .openapi({ example: "cover" }),
+                        resize_background: z.string().optional().describe("Resize background color").openapi({ example: "#ffffff" }),
+                        crop_left: z.string().optional().describe("Crop left (x)").openapi({ example: "0" }),
+                        crop_top: z.string().optional().describe("Crop top (y)").openapi({ example: "0" }),
+                        crop_width: z.string().optional().describe("Crop width").openapi({ example: "100" }),
+                        crop_height: z.string().optional().describe("Crop height").openapi({ example: "100" }),
                         format: z
                             .enum(["jpeg", "png", "webp", "avif", "tiff"])
                             .optional()
-                            .describe("Output format"),
-                        quality: z.string().optional().describe("Output quality (1-100)"),
-                        rotate: z.string().optional().describe("Rotation angle"),
-                        grayscale: z.string().optional().describe("Convert to grayscale (true/false)"),
+                            .describe("Output format")
+                            .openapi({ example: "webp" }),
+                        quality: z.string().optional().describe("Output quality (1-100)").openapi({ example: "80" }),
+                        rotate: z.string().optional().describe("Rotation angle").openapi({ example: "0" }),
+                        grayscale: z.string().optional().describe("Convert to grayscale (true/false)").openapi({ example: "false" }),
                     }),
                 },
             },

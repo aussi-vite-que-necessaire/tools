@@ -63,4 +63,13 @@ describe('Authentication', () => {
         });
         expect(resValid.status).toBe(200);
     });
+
+    it('should include security definition in OpenAPI docs', async () => {
+        const res = await app.request('/doc/json');
+        const doc = await res.json();
+
+        expect(doc.components.securitySchemes).toBeDefined();
+        expect(doc.components.securitySchemes.BearerAuth).toBeDefined();
+        expect(doc.security).toEqual([{ BearerAuth: [] }]);
+    });
 });

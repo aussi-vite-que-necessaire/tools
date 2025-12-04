@@ -16,12 +16,12 @@ const qrCodeRoute = createRoute({
             content: {
                 "multipart/form-data": {
                     schema: z.object({
-                        text: z.string().min(1).describe("Text to encode"),
-                        format: z.enum(["png", "svg"]).optional().default("png"),
-                        width: z.string().optional().describe("Width of the image"),
-                        margin: z.string().optional().describe("Margin around the QR Code"),
-                        color_dark: z.string().optional().describe("Dark color (hex)"),
-                        color_light: z.string().optional().describe("Light color (hex)"),
+                        text: z.string().min(1).describe("Text to encode").openapi({ example: "https://avqn.ch" }),
+                        format: z.enum(["png", "svg"]).optional().default("png").openapi({ example: "png" }),
+                        width: z.string().optional().describe("Width of the image").openapi({ example: "300" }),
+                        margin: z.string().optional().describe("Margin around the QR Code").openapi({ example: "4" }),
+                        color_dark: z.string().optional().describe("Dark color (hex)").openapi({ example: "#000000" }),
+                        color_light: z.string().optional().describe("Light color (hex)").openapi({ example: "#ffffff" }),
                     }),
                 },
             },

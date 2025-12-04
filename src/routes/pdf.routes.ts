@@ -417,14 +417,15 @@ const fromHtmlRoute = createRoute({
         "multipart/form-data": {
           schema: z
             .object({
-              html: z.string().optional().describe("HTML content to convert"),
-              url: z.string().url().optional().describe("URL to convert"),
+              html: z.string().optional().describe("HTML content to convert").openapi({ example: "<h1>Hello World</h1><p>This is a test PDF generated from HTML.</p>" }),
+              url: z.string().url().optional().describe("URL to convert").openapi({ example: "https://avqn.ch" }),
               format: z
                 .enum(["A4", "Letter", "A3", "A5", "Tabloid", "Legal"])
                 .optional()
-                .default("A4"),
-              landscape: z.string().optional().describe("Landscape mode (true/false)"),
-              printBackground: z.string().optional().describe("Print background (true/false)"),
+                .default("A4")
+                .openapi({ example: "A4" }),
+              landscape: z.string().optional().describe("Landscape mode (true/false)").openapi({ example: "false" }),
+              printBackground: z.string().optional().describe("Print background (true/false)").openapi({ example: "true" }),
             })
             .refine((data) => data.html || data.url, {
               message: "Either html or url must be provided",
