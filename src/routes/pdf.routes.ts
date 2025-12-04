@@ -37,7 +37,7 @@ const splitRoute = createRoute({
       description: "ZIP file containing individual PDF pages",
       content: {
         "application/zip": {
-          schema: z.instanceof(Buffer),
+          schema: z.string().openapi({ format: "binary" }),
         },
       },
     },
@@ -135,7 +135,7 @@ const mergeRoute = createRoute({
       description: "Merged PDF file",
       content: {
         "application/pdf": {
-          schema: z.instanceof(Buffer),
+          schema: z.string().openapi({ format: "binary" }),
         },
       },
     },
@@ -251,7 +251,7 @@ const extractRoute = createRoute({
       description: "ZIP file containing extracted PDF groups",
       content: {
         "application/zip": {
-          schema: z.instanceof(Buffer),
+          schema: z.string().openapi({ format: "binary" }),
         },
       },
     },
@@ -438,7 +438,7 @@ const fromHtmlRoute = createRoute({
       description: "Generated PDF file",
       content: {
         "application/pdf": {
-          schema: z.instanceof(Buffer),
+          schema: z.string().openapi({ format: "binary" }),
         },
       },
     },

@@ -36,10 +36,10 @@ const qrCodeRoute = createRoute({
             description: "QR Code image",
             content: {
                 "image/png": {
-                    schema: z.instanceof(Buffer),
+                    schema: z.string().openapi({ format: "binary" }),
                 },
                 "image/svg+xml": {
-                    schema: z.instanceof(Buffer),
+                    schema: z.string().openapi({ format: "binary" }),
                 },
             },
         },
