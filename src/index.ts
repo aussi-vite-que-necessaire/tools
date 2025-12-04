@@ -5,6 +5,7 @@ import { cors } from "hono/cors"
 import { serve } from "@hono/node-server"
 import scraperRoutes from "./routes/scraper.routes.js"
 import pdfRoutes from "./routes/pdf.routes.js"
+import toolsRoutes from "./routes/tools.routes.js"
 import { closeBrowser } from "./lib/browser.js"
 
 const app = new OpenAPIHono()
@@ -23,6 +24,7 @@ if (apiKey) {
 // Routes
 app.route("/", scraperRoutes)
 app.route("/", pdfRoutes)
+app.route("/", toolsRoutes)
 
 // Swagger UI
 app.doc("/doc/json", {
