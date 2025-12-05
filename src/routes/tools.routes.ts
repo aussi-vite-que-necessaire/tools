@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi"
 import { z } from "zod"
 import QRCode from "qrcode"
+import { marked } from "marked"
 
 const app = new OpenAPIHono()
 
@@ -36,6 +37,58 @@ const qrCodeRoute = createRoute({
                 },
                 "image/svg+xml": {
                     schema: z.string().openapi({ format: "binary" }),
+                },
+            },
+        },
+        400: {
+            description: "Invalid request",
+            content: {
+                "application/json": {
+                    schema: z.object({
+                        error: z.string(),
+                    }),
+                },
+            },
+        },
+        500: {
+            description: "Internal server error",
+            content: {
+                "application/json": {
+                    schema: z.object({
+                        error: z.string(),
+                    }),
+                },
+            },
+        },
+    },
+})
+
+// POST /api/tools/markdown
+const markdownRoute = createRoute({
+    method: "post",
+    path: "/api/tools/markdown",
+    tags: ["Tools"],
+    summary: "Convert Markdown to HTML",
+    description: "Converts Markdown text to HTML",
+    request: {
+        body: {
+            content: {
+                "multipart/form-data": {
+                    schema: z.object({
+                        markdown: z.string().min(1).describe("Markdown content to convert").openapi({ example: "# Hello World\nThis is **bold**." }),
+                    }),
+                },
+            },
+        },
+    },
+    responses: {
+        200: {
+            description: "Generated HTML",
+            content: {
+                "application/json": {
+                    schema: z.object({
+                        html: z.string(),
+                    }),
                 },
             },
         },
@@ -111,6 +164,29 @@ app.openapi(qrCodeRoute, async (c) => {
             error instanceof Error ? error.message : "Unknown error"
         return c.json(
             { error: `Failed to generate QR Code: ${errorMessage}` },
+            500
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any
+    }
+})
+
+app.openapi(markdownRoute, async (c) => {
+    try {
+        const body = await c.req.parseBody()
+        const markdown = body.markdown as string
+
+        if (!markdown) {
+            return c.json({ error: "Markdown content is required" }, 400)
+        }
+
+        const html = await marked.parse(markdown)
+
+        return c.json({ html })
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error"
+        return c.json(
+            { error: `Failed to convert Markdown: ${errorMessage}` },
             500
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ) as any

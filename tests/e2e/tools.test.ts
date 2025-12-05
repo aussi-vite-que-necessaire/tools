@@ -80,4 +80,35 @@ describe("Tools API", () => {
             expect(String.fromCharCode(...header)).toBe("%PDF")
         }, 30000) // Increase timeout for Puppeteer
     })
+
+    describe("POST /api/tools/markdown", () => {
+        it("should convert Markdown to HTML", async () => {
+            const formData = new FormData()
+            formData.append("markdown", "# Hello World\nThis is **bold**.")
+
+            const res = await app.request("/api/tools/markdown", {
+                method: "POST",
+                body: formData,
+            })
+
+            expect(res.status).toBe(200)
+            const data = await res.json()
+            expect(data).toHaveProperty("html")
+            expect(data.html).toContain("<h1>Hello World</h1>")
+            expect(data.html).toContain("<strong>bold</strong>")
+        })
+
+        it("should return 400 if markdown is missing", async () => {
+            const formData = new FormData()
+
+            const res = await app.request("/api/tools/markdown", {
+                method: "POST",
+                body: formData,
+            })
+
+            expect(res.status).toBe(400)
+            const data = await res.json()
+            expect(data).toHaveProperty("error")
+        })
+    })
 })
